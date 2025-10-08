@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/database';
+import { env } from '../config/env';
 import { User, JWTPayload } from '../types';
 
 export class AuthService {
@@ -30,7 +31,7 @@ export class AuthService {
       const user = result.rows[0];
       const token = jwt.sign(
         { user_id: user.user_id, email: user.email } as JWTPayload,
-        process.env.JWT_SECRET || 'your_jwt_secret_key_here',
+        env.jwtSecret,
         { expiresIn: '24h' }
       );
 
@@ -61,7 +62,7 @@ export class AuthService {
 
       const token = jwt.sign(
         { user_id: user.user_id, email: user.email } as JWTPayload,
-        process.env.JWT_SECRET || 'your_jwt_secret_key_here',
+        env.jwtSecret,
         { expiresIn: '24h' }
       );
 

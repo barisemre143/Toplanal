@@ -2,29 +2,27 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
 import routes from './routes';
 import pool from './config/database';
-
-dotenv.config();
+import { env } from './config/env';
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: env.frontendUrl,
     methods: ["GET", "POST"]
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = env.port;
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: env.frontendUrl,
   credentials: true
 }));
 app.use(morgan('combined'));
