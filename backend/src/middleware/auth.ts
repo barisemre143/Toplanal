@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWTPayload } from '../types';
+import { env } from '../config/env';
 
 declare global {
   namespace Express {
@@ -19,7 +20,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key_here') as JWTPayload;
+    const decoded = jwt.verify(token, env.jwtSecret) as JWTPayload;
     req.user = decoded;
     next();
   } catch (error) {
@@ -33,7 +34,7 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction) =>
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key_here') as JWTPayload;
+      const decoded = jwt.verify(token, env.jwtSecret) as JWTPayload;
       req.user = decoded;
     } catch (error) {
       // Token invalid but continue without user
