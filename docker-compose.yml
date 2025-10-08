@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ecommerce_db
+    environment:
+      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ecommerce_network
+
+  backend:
+    build: ./backend
+    container_name: ecommerce_backend
+    depends_on:
+      - postgres
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ecommerce_db
+      DB_USER: postgres
+      DB_PASSWORD: password123
+      JWT_SECRET: your_jwt_secret_key_here
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - ecommerce_network
+
+  frontend:
+    build: ./frontend
+    container_name: ecommerce_frontend
+    depends_on:
+      - backend
+    environment:
+      REACT_APP_API_URL: http://localhost:3001/api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - ecommerce_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: ecommerce_nginx
+    depends_on:
+      - frontend
+      - backend
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - ecommerce_network
+
+volumes:
+  postgres_data:
+
+networks:
+  ecommerce_network:
+    driver: bridge
